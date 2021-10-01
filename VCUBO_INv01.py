@@ -24,11 +24,6 @@ conn = sql.connect('beta_projects.db')
 #df_proj.to_sql('beta_projects', conn)
 
 df_projects = pd.read_sql('SELECT * FROM beta_projects', conn)
-#st.write(len(df_projects))
-data01 = st.expander("SQL DB", expanded=True)
-with data01:
-    st.write(df_projects)
-
 
 st.session_state.clients_list = ['-']+df_char[~df_char['CLIENT_SIZE'].isna()]['CLIENT_SIZE'].unique().tolist()
 st.session_state.protype_list = ['-']+df_char[~df_char['PROJ_TYPE'].isna()]['PROJ_TYPE'].unique().tolist()
@@ -45,7 +40,7 @@ st.session_state.contras_list = ['-']+df_char[~df_char['CONTR_SIZE'].isna()]['CO
 st.session_state.greenfl_list = ['-']+df_char[~df_char['GREENFIELD'].isna()]['GREENFIELD'].unique().tolist()
 st.session_state.prefabr_list = ['-']+df_char[~df_char['PREFAB'].isna()]['PREFAB'].unique().tolist()
 
-pr_reg01 = st.expander("L1 SETUP", expanded=True)
+pr_reg01 = st.expander("L1 SET UP", expanded=False)
 with pr_reg01:
     a01,a02, a03, = st.columns(3)
 #L1 FACTORS
@@ -55,7 +50,7 @@ with pr_reg01:
     #create_pr = st.button('CREATE PROJECT')
 
 #L2 FACTORS
-pr_reg02 = st.expander("L2 SETUP", expanded=True)
+pr_reg02 = st.expander("L2 SET UP", expanded=False)
 with pr_reg02:
     b01,b02, b03, b04 = st.columns(4)
     with b01:
@@ -72,7 +67,7 @@ with pr_reg02:
     #add_l2 = st.button("ADD LEVEL2  ")
 
 # L3 FACTORS
-pr_reg03 = st.expander("L3 SETUP", expanded=True)
+pr_reg03 = st.expander("L3 SET UP", expanded=False)
 with pr_reg03:
     c01,c02, c03, c04 = st.columns(4)
     with c01: sel_contype = st.selectbox('CONTRACT TYPE', st.session_state.contype_list)
@@ -98,3 +93,9 @@ def form_callback():
 #    slider_input = st.slider('My slider', 0, 10, 5, key='my_slider')
 #    checkbox_input = st.checkbox('Yes or No', key='my_checkbox')
 #    submit_button = st.form_submit_button(label='Submit', on_click=form_callback)
+#st.write(len(df_projects))
+data01 = st.expander("VIEW UPLOADED REGISTER", expanded=False)
+with data01:
+    st.write(df_projects,)
+
+add_reg = st.button('SUBMIT PROJECT')
