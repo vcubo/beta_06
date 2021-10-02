@@ -21,7 +21,7 @@ char_dict = {''}
 
 # DATABASE CONNECTION
 conn = sql.connect('beta_projects.db')
-df_proj.to_sql('beta_projects', conn)
+#df_proj.to_sql('beta_projects', conn)
 
 df_projects = pd.read_sql('SELECT * FROM beta_projects', conn)
 
