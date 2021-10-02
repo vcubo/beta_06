@@ -49,9 +49,11 @@ st.session_state.prefabr_list = ['-']+df_char[~df_char['PREFAB'].isna()]['PREFAB
 
 
 with st.form('reg_upload'):
-    st.session_state.COM_ID = st.text_input('COMPANY ID')
+    a1, a2 = st.columns(2)
+    with a1: st.session_state.COM_ID = st.text_input('COMPANY ID')
+    with a2: st.session_state.L1_ID = st.text_input('PROJECT ID')
     st.markdown('***')
-    st.markdown('LEVEL 1')
+    #st.markdown('LEVEL 1')
     a01,a02, a03, = st.columns(3)
 #L1 FACTORS
     with a01: sel_clients = st.selectbox('CLIENT SIZE', st.session_state.clients_list)
@@ -60,14 +62,14 @@ with st.form('reg_upload'):
     #create_pr = st.button('CREATE PROJECT')
     st.markdown('***')
 #L2 FACTORS
-    st.markdown('LEVEL 2')
+    #st.markdown('LEVEL 2')
     b01,b02, b03, b04 = st.columns(4)
     with b01:
         sel_prphase = st.selectbox('PROJECT PHASE', st.session_state.prphase_list)
         sel_country = st.selectbox('COUNTRY', st.session_state.country_list)
     with b02:
         sel_climate = st.selectbox('CLIMATE', st.session_state.climate_list, help=path_climate)
-        sel_elevate = st.selectbox('SITE ELVATION', st.session_state.elevate_list)
+        sel_elevate = st.selectbox('SITE ELEVATION', st.session_state.elevate_list)
     with b03:
         sel_citysiz = st.selectbox('NEAREST CITY SIZE',st.session_state.citysiz_list)
         sel_citydis = st.selectbox('NEAREST CITY DISTANCE', st.session_state.citydis_list)
@@ -76,7 +78,7 @@ with st.form('reg_upload'):
     #add_l2 = st.button("ADD LEVEL2  ")
     st.markdown('***')
 # L3 FACTORS
-    st.markdown('LEVEL 3')
+    #st.markdown('LEVEL 3')
     c01,c02, c03, c04 = st.columns(4)
     with c01: sel_contype = st.selectbox('CONTRACT TYPE', st.session_state.contype_list)
     with c02: sel_contras = st.selectbox('MAIN CONTRACTOR', st.session_state.contras_list)
@@ -90,14 +92,22 @@ with st.form('reg_upload'):
     with d02: sel_bl_finis = st.date_input('BL FINISH')
     with d03: sel_ac_start = st.date_input('ACTUAL START')
     with d04: sel_ac_finis = st.date_input('ACTUAL FINISH')
-    add_reg = st.form_submit_button('ADD REGISTER')
+    add_reg = st.form_submit_button('CHECK REGISTER')
     if add_reg:
         st.session_state.rg_df1['COM_ID'][0] = st.session_state.COM_ID
+        st.session_state.rg_df1['L1_ID'][0] = st.session_state.L1_ID
         st.session_state.rg_df1['COUNTRY1'][0] = sel_country
         st.session_state.rg_df1['PROJ_TYPE'][0] = sel_protype
+        st.session_state.rg_df1['PHASE'][0] = sel_prphase
+        st.session_state.rg_df1['PROJ_SIZE'][0] = sel_prosize
+        st.session_state.rg_df1['CONTR_TYPE'][0] = sel_contype
+        st.session_state.rg_df1['GREENFIELD'][0] = sel_greenfl
+        st.session_state.rg_df1['PREFAB'][0] = sel_prefabr
 
     st.write(st.session_state.rg_df1)
-
+add_reg = st.button('ADD REGISTER')
+if add_reg:
+    st.session_state.pr_df.append(st.session_state.rg_df1, ignore_index=True)
 
 data01 = st.expander("VIEW UPLOADED REGISTERS", expanded=False)
 with data01:
