@@ -25,6 +25,12 @@ conn = sql.connect('beta_projects.db')
 
 df_projects = pd.read_sql('SELECT * FROM beta_projects', conn)
 
+if 'pr_df' not in st.session_state:
+    st.session_state.pr_df = df_projects.copy()
+if 'rg_df1' not in st.session_state:
+    st.session_state.rg_df1 = df_projects.copy()
+    st.session_state.rg_df2 = df_projects.copy()
+
 st.session_state.clients_list = ['-']+df_char[~df_char['CLIENT_SIZE'].isna()]['CLIENT_SIZE'].unique().tolist()
 st.session_state.protype_list = ['-']+df_char[~df_char['PROJ_TYPE'].isna()]['PROJ_TYPE'].unique().tolist()
 st.session_state.prosize_list = ['-']+df_char[~df_char['PROJ_SIZE'].isna()]['PROJ_SIZE'].unique().tolist()
@@ -40,18 +46,21 @@ st.session_state.contras_list = ['-']+df_char[~df_char['CONTR_SIZE'].isna()]['CO
 st.session_state.greenfl_list = ['-']+df_char[~df_char['GREENFIELD'].isna()]['GREENFIELD'].unique().tolist()
 st.session_state.prefabr_list = ['-']+df_char[~df_char['PREFAB'].isna()]['PREFAB'].unique().tolist()
 
-pr_reg01 = st.expander("L1 SET UP", expanded=False)
-with pr_reg01:
+
+
+with st.form('reg_upload'):
+    st.session_state.COM_ID = st.text_input('COMPANY ID')
+    st.markdown('***')
+    st.markdown('LEVEL 1')
     a01,a02, a03, = st.columns(3)
 #L1 FACTORS
     with a01: sel_clients = st.selectbox('CLIENT SIZE', st.session_state.clients_list)
     with a02: sel_protype = st.selectbox('PROJECT TYPE', st.session_state.protype_list)
     with a03: sel_prosize = st.selectbox('PROJECT SIZE', st.session_state.prosize_list)
     #create_pr = st.button('CREATE PROJECT')
-
+    st.markdown('***')
 #L2 FACTORS
-pr_reg02 = st.expander("L2 SET UP", expanded=False)
-with pr_reg02:
+    st.markdown('LEVEL 2')
     b01,b02, b03, b04 = st.columns(4)
     with b01:
         sel_prphase = st.selectbox('PROJECT PHASE', st.session_state.prphase_list)
@@ -65,37 +74,34 @@ with pr_reg02:
     with b04:
         sel_termdis = st.selectbox('NEAREST TERMINAL DISTANCE',st.session_state.termdis_list, help=path_terminal)
     #add_l2 = st.button("ADD LEVEL2  ")
-
+    st.markdown('***')
 # L3 FACTORS
-pr_reg03 = st.expander("L3 SET UP", expanded=False)
-with pr_reg03:
+    st.markdown('LEVEL 3')
     c01,c02, c03, c04 = st.columns(4)
     with c01: sel_contype = st.selectbox('CONTRACT TYPE', st.session_state.contype_list)
     with c02: sel_contras = st.selectbox('MAIN CONTRACTOR', st.session_state.contras_list)
     with c03: sel_greenfl = st.selectbox('GREENFIELD %', st.session_state.greenfl_list)
     with c04: sel_prefabr = st.selectbox('PREFABRICATE %', st.session_state.prefabr_list)
-
-#pr_reg04 = st.expander("L3 DATES", expanded=True)
-#with pr_reg04:
+    st.markdown('***')
+# DATES
+    st.markdown('DATES')
     d01, d02, d03, d04 = st.columns(4)
     with d01: sel_bl_start = st.date_input('BL START')
     with d02: sel_bl_finis = st.date_input('BL FINISH')
     with d03: sel_ac_start = st.date_input('ACTUAL START')
     with d04: sel_ac_finis = st.date_input('ACTUAL FINISH')
-add_reg = st.button('ADD REGISTER')
+    add_reg = st.form_submit_button('ADD REGISTER')
+    if add_reg:
+        st.session_state.rg_df1['COM_ID'][0] = st.session_state.COM_ID
+        st.session_state.rg_df1['COUNTRY1'][0] = sel_country
+        st.session_state.rg_df1['PROJ_TYPE'][0] = sel_protype
+
+    st.write(st.session_state.rg_df1)
 
 
-def form_callback():
-    st.write(st.session_state.my_slider)
-    st.write(st.session_state.my_checkbox)
-
-#with st.form(key='my_form'):
-#    slider_input = st.slider('My slider', 0, 10, 5, key='my_slider')
-#    checkbox_input = st.checkbox('Yes or No', key='my_checkbox')
-#    submit_button = st.form_submit_button(label='Submit', on_click=form_callback)
-#st.write(len(df_projects))
-data01 = st.expander("VIEW UPLOADED REGISTER", expanded=False)
+data01 = st.expander("VIEW UPLOADED REGISTERS", expanded=False)
 with data01:
-    st.write(df_projects,)
+    st.write(st.session_state.pr_df)
+    #
 
 add_reg = st.button('SUBMIT PROJECT')
