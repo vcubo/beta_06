@@ -142,8 +142,15 @@ else: st.write(st.session_state.pr_df)
 #if del_reg:
 #    st.session_state.pr_df = st.session_state.pr_df.drop(int(del_index)).copy()
 add_reg = st.button('SUBMIT PROJECT')
+
 if add_reg:
-    path_save ='https://raw.githubusercontent.com/vcubo/beta_06/main/test_pr/test_pr_'+str((np.int(time.time())))+'.csv'
-    st.session_state.pr_df.to_csv(path_save)
+    table_pr_id = st.session_state.COM_ID+str((np.int(time.time())))
+    st.write("Saved as table",table_pr_id)
+    st.session_state.pr_df.to_sql(table_pr_id, conn, if_exists='replace')
+
+    sql_instr ='"""create table '+table_pr_id+' as select * from '+table_pr_id+'"""'
+    conn.execute(sql_instr)
+    #st.session_state.pr_df.to_csv(path_save)
+    st.write(sql_instr)
 
 st.markdown('***')
