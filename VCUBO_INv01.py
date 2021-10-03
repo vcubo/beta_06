@@ -148,9 +148,9 @@ if add_reg:
     st.write("Saved as table",table_pr_id)
     st.session_state.pr_df.to_sql(table_pr_id, conn, if_exists='replace')
 
-    sql_instr ='"""create table '+table_pr_id+' as select * from '+table_pr_id+'"""'
-    conn.execute(sql_instr)
+    #sql_instr ='"""create table '+table_pr_id+' as select * from '+table_pr_id+'"""'
+    #conn.execute(sql_instr)
     #st.session_state.pr_df.to_csv(path_save)
-    st.write(sql_instr)
+    #st.write(sql_instr)
 
 st.markdown('***')
