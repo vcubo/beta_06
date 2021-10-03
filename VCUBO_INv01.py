@@ -142,4 +142,8 @@ else: st.write(st.session_state.pr_df)
 #if del_reg:
 #    st.session_state.pr_df = st.session_state.pr_df.drop(int(del_index)).copy()
 add_reg = st.button('SUBMIT PROJECT')
+if add_reg:
+    path_save ='https://raw.githubusercontent.com/vcubo/beta_06/main/test_pr/test_pr_'+str((np.int(time.time())))+'.csv'
+    st.session_state.pr_df.to_csv(path_save)
+
 st.markdown('***')
