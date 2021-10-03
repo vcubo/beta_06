@@ -21,7 +21,7 @@ char_dict = {''}
 
 # DATABASE CONNECTION
 conn = sql.connect('beta_projects.db')
-df_proj.to_sql('beta_projects', conn)
+#df_proj.to_sql('beta_projects', conn)
 
 df_projects = pd.read_sql('SELECT * FROM beta_projects', conn)
 
@@ -47,7 +47,7 @@ st.session_state.greenfl_list = ['-']+df_char[~df_char['GREENFIELD'].isna()]['GR
 st.session_state.prefabr_list = ['-']+df_char[~df_char['PREFAB'].isna()]['PREFAB'].unique().tolist()
 
 
-
+st.subheader('1. COMPLETAR DATOS')
 with st.form('reg_upload'):
     a1, a2 = st.columns(2)
     with a1: st.session_state.COM_ID = st.text_input('COMPANY ID')
@@ -103,15 +103,43 @@ with st.form('reg_upload'):
         st.session_state.rg_df1['CONTR_TYPE'][0] = sel_contype
         st.session_state.rg_df1['GREENFIELD'][0] = sel_greenfl
         st.session_state.rg_df1['PREFAB'][0] = sel_prefabr
-
+        st.session_state.rg_df1['CLIMATE'][0] = sel_climate
+        st.session_state.rg_df1['ELEVATION'][0] = sel_elevate
+        st.session_state.rg_df1['CITY_SIZE'][0] = sel_citysiz
+        st.session_state.rg_df1['CITY_DIST'][0] = sel_citydis
+        st.session_state.rg_df1['TERM_DIST'][0] = sel_termdis
+        st.session_state.rg_df1['CLIENT_SIZE'][0] = sel_clients
+        st.session_state.rg_df1['CONTR_SIZE'][0] = sel_contras
+        st.session_state.rg_df1['BL_START'][0] = sel_bl_start
+        st.session_state.rg_df1['BL_FINISH'][0] = sel_bl_finis
+        st.session_state.rg_df1['AC_START'][0] = sel_ac_start
+        st.session_state.rg_df1['AC_FINISH'][0] = sel_ac_finis
+st.markdown('***')
+st.subheader('2. PRECARGA DE REGISTROS')
+show_table = st.checkbox('SHOW COMPLETE TABLE')
+if show_table:
+    st.table(st.session_state.rg_df1)
+else:
     st.write(st.session_state.rg_df1)
 add_reg = st.button('ADD REGISTER')
+#st.write(st.session_state.rg_df1)
 if add_reg:
-    st.session_state.pr_df.append(st.session_state.rg_df1, ignore_index=True)
+    if st.session_state.pr_df['COM_ID'][0] == 'a':
+        st.session_state.pr_df = st.session_state.rg_df1.copy()
+    else:
+        st.session_state.pr_df = st.session_state.pr_df.append(st.session_state.rg_df1, ignore_index=True)
+st.markdown('***')
+st.subheader("3. REGISTROS DE PROYECTO A SUBIR EN BASE DE DATOS")
+if show_table: st.table(st.session_state.pr_df)
+else: st.write(st.session_state.pr_df)
 
-data01 = st.expander("VIEW UPLOADED REGISTERS", expanded=False)
-with data01:
-    st.write(st.session_state.pr_df)
-    #
-
+#del_range = [i for i in range(len(st.session_state.pr_df))]
+#st.write("DELETE ENTERED REGISTER")
+#c01, c02 = st.columns((1,2))
+#with c01:
+#    del_index = st.selectbox('NUMBER', del_range)
+#    del_reg = st.button('DELETE SELECTED REGISTER')
+#if del_reg:
+#    st.session_state.pr_df = st.session_state.pr_df.drop(int(del_index)).copy()
 add_reg = st.button('SUBMIT PROJECT')
+st.markdown('***')
