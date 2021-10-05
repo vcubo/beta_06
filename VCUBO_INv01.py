@@ -10,6 +10,9 @@ path_terminal = 'https://www.searates.com/maritime/'
 
 path_charact = 'https://raw.githubusercontent.com/vcubo/beta_06/main/VCUBO_PRCHARv01.csv'
 path_projects = 'https://raw.githubusercontent.com/vcubo/beta_06/main/VCUBO_PRTABLEv01.csv'
+path_csvtemp = '/Users/facu/Desktop/VCUBO/02 PRODUCT/beta_06/test_pr/'
+path_csvtemp2 = 'https://raw.githubusercontent.com/vcubo/beta_06/main/test_pr/'
+path_csvend = 'v01.csv'
 
 df_char = pd.read_csv(path_charact)
 df_proj = pd.read_csv(path_projects)
@@ -145,7 +148,14 @@ add_reg = st.button('SUBMIT PROJECT')
 
 if add_reg:
     table_pr_id = st.session_state.COM_ID+str((np.int(time.time())))
-    st.write("Saved as table",table_pr_id)
+
+    path = path_csvtemp2+st.session_state.COM_ID+path_csvend
+    if st.session_state.COM_ID == 'BIO4':
+        st.success("Project uploaded (waiting for validation)")
+    else:
+        st.error("Incorrect company ID")
+    st.session_state.pr_df.to_csv(path, header=False, mode='a')
+
     st.session_state.pr_df.to_sql(table_pr_id, conn, if_exists='replace')
 
     #sql_instr ='"""create table '+table_pr_id+' as select * from '+table_pr_id+'"""'
