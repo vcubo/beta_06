@@ -59,7 +59,8 @@ st.session_state.contras_list = ['-']+df_char[~df_char['CONTR_SIZE'].isna()]['CO
 st.session_state.greenfl_list = ['-']+df_char[~df_char['GREENFIELD'].isna()]['GREENFIELD'].unique().tolist()
 st.session_state.prefabr_list = ['-']+df_char[~df_char['PREFAB'].isna()]['PREFAB'].unique().tolist()
 
-
+st.header('PORJECTS UPLOAD')
+st.caption('VCUBO beta v0.6')
 st.subheader('1. COMPLETAR DATOS')
 with st.form('reg_upload'):
     a1, a2 = st.columns(2)
