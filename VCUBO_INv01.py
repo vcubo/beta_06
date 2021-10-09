@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import sqlite3 as sql
+import psycopg2
 import time
 
 import streamlit as st
@@ -19,13 +20,22 @@ df_proj = pd.read_csv(path_projects)
 
 char_dict = {''}
 
-#st.write(df_char)
-#st.write(df_proj)
+@st.cache(allow_output_mutation=True, hash_funcs={"_thread.RLock": lambda _: None})
+def init_connection():
+    return psycopg2.connect(**st.secrets["postgres_prod"])
+
+conn2 = init_connection()
+
+@st.cache(ttl=600)
+def run_query(query):
+    with conn2.cursor() as cur:
+        cur.execute(query)
+        conn2.commit()
+
 
 # DATABASE CONNECTION
 conn = sql.connect('beta_projects.db')
 #df_proj.to_sql('beta_projects', conn)
-
 df_projects = pd.read_sql('SELECT * FROM beta_projects', conn)
 
 if 'pr_df' not in st.session_state:
@@ -133,8 +143,7 @@ if add_reg:
         st.session_state.pr_df = st.session_state.pr_df.append(st.session_state.rg_df1, ignore_index=True)
 st.markdown('***')
 st.subheader("3. REGISTROS DE PROYECTO A SUBIR EN BASE DE DATOS")
-if show_table: st.table(st.session_state.pr_df)
-else: st.write(st.session_state.pr_df)
+
 
 #del_range = [i for i in range(len(st.session_state.pr_df))]
 #st.write("DELETE ENTERED REGISTER")
@@ -144,23 +153,17 @@ else: st.write(st.session_state.pr_df)
 #    del_reg = st.button('DELETE SELECTED REGISTER')
 #if del_reg:
 #    st.session_state.pr_df = st.session_state.pr_df.drop(int(del_index)).copy()
-add_reg = st.button('SUBMIT PROJECT')
 
-if add_reg:
-    table_pr_id = st.session_state.COM_ID+str((np.int(time.time())))
 
-    path = path_csvtemp2+st.session_state.COM_ID+path_csvend
-    if st.session_state.COM_ID == 'BIO4':
-        st.success("Project uploaded (waiting for validation)")
-    else:
-        st.error("Incorrect company ID")
-    st.session_state.pr_df.to_csv(path, header=False, mode='a')
+with st.form('upload_project'):
+    if show_table: st.table(st.session_state.pr_df)
+    else: st.write(st.session_state.pr_df)
+    create = st.form_submit_button("Upload project")
+    if create:
+        for i in range(len(st.session_state.pr_df)):
+            upload_query = f"INSERT INTO pr_main (com_id, l1_id, l2_id, country1, country2, proj_type, phase, proj_size, contr_type, greenfield, prefab, climate, elevation, city_size, city_dist, term_dist, client_size, contr_size, bl_start, bl_finish, ac_start, ac_finish) VALUES('{st.session_state.pr_df['COM_ID'][i]}','{st.session_state.pr_df['L1_ID'][i]}','{st.session_state.pr_df['L2_ID'][i]}','{st.session_state.pr_df['COUNTRY1'][i]}','{st.session_state.pr_df['COUNTRY2'][i]}','{st.session_state.pr_df['PROJ_TYPE'][i]}','{st.session_state.pr_df['PHASE'][i]}','{st.session_state.pr_df['PROJ_SIZE'][i]}','{st.session_state.pr_df['CONTR_TYPE'][i]}','{st.session_state.pr_df['GREENFIELD'][i]}','{st.session_state.pr_df['PREFAB'][i]}','{st.session_state.pr_df['CLIMATE'][i]}','{st.session_state.pr_df['ELEVATION'][i]}','{st.session_state.pr_df['CITY_SIZE'][i]}','{st.session_state.pr_df['CITY_DIST'][i]}','{st.session_state.pr_df['TERM_DIST'][i]}','{st.session_state.pr_df['CLIENT_SIZE'][i]}','{st.session_state.pr_df['CONTR_SIZE'][i]}','{st.session_state.pr_df['BL_START'][i]}','{st.session_state.pr_df['BL_FINISH'][i]}','{st.session_state.pr_df['AC_START'][i]}','{st.session_state.pr_df['AC_FINISH'][i]}');"
+            st.caption(f'uploading (running query): {upload_query}')
 
-    st.session_state.pr_df.to_sql(table_pr_id, conn, if_exists='replace')
-
-    #sql_instr ='"""create table '+table_pr_id+' as select * from '+table_pr_id+'"""'
-    #conn.execute(sql_instr)
-    #st.session_state.pr_df.to_csv(path_save)
-    #st.write(sql_instr)
-
+            run_query(upload_query)
+        st.success("Project uploaded (waiting for review)")
 st.markdown('***')
