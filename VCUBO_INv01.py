@@ -3,7 +3,7 @@ import numpy as np
 import sqlite3 as sql
 import psycopg2
 import time
-from st_aggrid import AgGrid
+#from st_aggrid import AgGrid
 
 import streamlit as st
 
@@ -175,7 +175,7 @@ with del01:
 
     with st.form('upload_project'):
         #if show_table: st.table(st.session_state.pr_df)
-        AgGrid(st.session_state.pr_df)
+        st.write(st.session_state.pr_df)
         upload_pr = st.form_submit_button("Upload project")
         if upload_pr:
             for i in range(len(st.session_state.pr_df)):
