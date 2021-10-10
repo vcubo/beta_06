@@ -6,4 +6,3 @@ scipy
 hydralit_components
 streamlit_analytics
 psycopg2
-st_aggrid
