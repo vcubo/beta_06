@@ -3,13 +3,16 @@ import numpy as np
 import sqlite3 as sql
 import psycopg2
 import time
+from st_aggrid import AgGrid
 
 import streamlit as st
 
 path_climate = 'https://climatecharts.net/'
 path_terminal = 'https://www.searates.com/maritime/'
 
+#path_charact = '/Users/facu/Desktop/VCUBO/02 PRODUCT/beta_06/VCUBO_PRCHARv01.csv'
 path_charact = 'https://raw.githubusercontent.com/vcubo/beta_06/main/VCUBO_PRCHARv01.csv'
+#path_projects = '/Users/facu/Desktop/VCUBO/02 PRODUCT/beta_06/VCUBO_PRTABLEv01.csv'
 path_projects = 'https://raw.githubusercontent.com/vcubo/beta_06/main/VCUBO_PRTABLEv01.csv'
 path_csvtemp = '/Users/facu/Desktop/VCUBO/02 PRODUCT/beta_06/test_pr/'
 path_csvtemp2 = 'https://raw.githubusercontent.com/vcubo/beta_06/main/test_pr/'
@@ -59,9 +62,9 @@ st.session_state.contras_list = ['-']+df_char[~df_char['CONTR_SIZE'].isna()]['CO
 st.session_state.greenfl_list = ['-']+df_char[~df_char['GREENFIELD'].isna()]['GREENFIELD'].unique().tolist()
 st.session_state.prefabr_list = ['-']+df_char[~df_char['PREFAB'].isna()]['PREFAB'].unique().tolist()
 
-st.header('PORJECT UPLOAD')
-st.caption('VCUBO beta v0.6')
-st.subheader('1. COMPLETAR DATOS')
+st.header('vcubo UPLOAD APP')
+st.caption('beta v0.6')
+st.subheader('1. PROJECT DATA INPUT')
 with st.form('reg_upload'):
     a1, a2 = st.columns(2)
     with a1: st.session_state.COM_ID = st.text_input('COMPANY ID')
@@ -106,8 +109,8 @@ with st.form('reg_upload'):
     with d02: sel_bl_finis = st.date_input('BL FINISH')
     with d03: sel_ac_start = st.date_input('ACTUAL START')
     with d04: sel_ac_finis = st.date_input('ACTUAL FINISH')
-    add_reg = st.form_submit_button('CHECK REGISTER')
-    if add_reg:
+    check_reg = st.form_submit_button('CHECK REGISTER')
+    if check_reg:
         st.session_state.rg_df1['COM_ID'][0] = st.session_state.COM_ID
         st.session_state.rg_df1['L1_ID'][0] = st.session_state.L1_ID
         st.session_state.rg_df1['COUNTRY1'][0] = sel_country
@@ -128,43 +131,59 @@ with st.form('reg_upload'):
         st.session_state.rg_df1['BL_FINISH'][0] = sel_bl_finis
         st.session_state.rg_df1['AC_START'][0] = sel_ac_start
         st.session_state.rg_df1['AC_FINISH'][0] = sel_ac_finis
-st.markdown('***')
-st.subheader('2. PRECARGA DE REGISTROS')
-show_table = st.checkbox('SHOW COMPLETE TABLE')
-if show_table:
-    st.table(st.session_state.rg_df1)
-else:
+        #KEY:
+        st.session_state.rg_df1['L2_ID'][0] = f'{st.session_state.COM_ID}{st.session_state.L1_ID}-{int(time.time())}'
+    #show_table = st.checkbox('SHOW COMPLETE TABLE')
+    #if show_table:
+    #st.table(st.session_state.rg_df1)
+    #else:
     st.write(st.session_state.rg_df1)
+
+#st.markdown('***')
+#st.subheader('2. PRECARGA DE REGISTROS')
+
 add_reg = st.button('ADD REGISTER')
 #st.write(st.session_state.rg_df1)
 if add_reg:
-    if st.session_state.pr_df['COM_ID'][0] == 'a':
+    if len(st.session_state.pr_df['COM_ID']) == 0:
         st.session_state.pr_df = st.session_state.rg_df1.copy()
-    else:
+    elif st.session_state.pr_df['COM_ID'][0] == '-':
+        st.session_state.pr_df = st.session_state.rg_df1.copy()
+    elif st.session_state.pr_df['COM_ID'][0] != '-':
         st.session_state.pr_df = st.session_state.pr_df.append(st.session_state.rg_df1, ignore_index=True)
+    st.session_state.pr_df['index'] = st.session_state.pr_df.index
+
 st.markdown('***')
-st.subheader("3. REGISTROS DE PROYECTO A SUBIR EN BASE DE DATOS")
+st.subheader("2. PROJECT UPLOAD")
+
+del_list = ['-']+st.session_state.pr_df['index'].unique().tolist()
+del01, del02 = st.columns((13,2))
+with del02:
+    delete_reg_num = st.selectbox('INDEX', del_list)
+    delete_reg = st.button('DELETE')
+if delete_reg:
+    if delete_reg_num == '-':
+        st.warning(f'Select item index to delete')
+    else:
+        del_index = st.session_state.pr_df[st.session_state.pr_df['index'] == delete_reg_num].index
+        st.session_state.pr_df = st.session_state.pr_df.drop(del_index[0])
+        #st.info(f'Register L2_ID number {delete_reg_num} deleted')
+        st.session_state.pr_df = st.session_state.pr_df.reset_index(drop=True)
+        st.session_state.pr_df['index'] = st.session_state.pr_df.index
+
+with del01:
+
+    with st.form('upload_project'):
+        #if show_table: st.table(st.session_state.pr_df)
+        AgGrid(st.session_state.pr_df)
+        upload_pr = st.form_submit_button("Upload project")
+        if upload_pr:
+            for i in range(len(st.session_state.pr_df)):
+                upload_query = f"INSERT INTO pr_main (com_id, l1_id, l2_id, country1, country2, proj_type, phase, proj_size, contr_type, greenfield, prefab, climate, elevation, city_size, city_dist, term_dist, client_size, contr_size, bl_start, bl_finish, ac_start, ac_finish) VALUES('{st.session_state.pr_df['COM_ID'][i]}','{st.session_state.pr_df['L1_ID'][i]}','{st.session_state.pr_df['L2_ID'][i]}','{st.session_state.pr_df['COUNTRY1'][i]}','{st.session_state.pr_df['COUNTRY2'][i]}','{st.session_state.pr_df['PROJ_TYPE'][i]}','{st.session_state.pr_df['PHASE'][i]}','{st.session_state.pr_df['PROJ_SIZE'][i]}','{st.session_state.pr_df['CONTR_TYPE'][i]}','{st.session_state.pr_df['GREENFIELD'][i]}','{st.session_state.pr_df['PREFAB'][i]}','{st.session_state.pr_df['CLIMATE'][i]}','{st.session_state.pr_df['ELEVATION'][i]}','{st.session_state.pr_df['CITY_SIZE'][i]}','{st.session_state.pr_df['CITY_DIST'][i]}','{st.session_state.pr_df['TERM_DIST'][i]}','{st.session_state.pr_df['CLIENT_SIZE'][i]}','{st.session_state.pr_df['CONTR_SIZE'][i]}','{st.session_state.pr_df['BL_START'][i]}','{st.session_state.pr_df['BL_FINISH'][i]}','{st.session_state.pr_df['AC_START'][i]}','{st.session_state.pr_df['AC_FINISH'][i]}');"
+                st.success(f'Uploaded {st.session_state.pr_df["L2_ID"][i]} (waiting for review)')
+                run_query(upload_query)
 
 
-#del_range = [i for i in range(len(st.session_state.pr_df))]
-#st.write("DELETE ENTERED REGISTER")
-#c01, c02 = st.columns((1,2))
-#with c01:
-#    del_index = st.selectbox('NUMBER', del_range)
-#    del_reg = st.button('DELETE SELECTED REGISTER')
-#if del_reg:
-#    st.session_state.pr_df = st.session_state.pr_df.drop(int(del_index)).copy()
 
 
-with st.form('upload_project'):
-    if show_table: st.table(st.session_state.pr_df)
-    else: st.write(st.session_state.pr_df)
-    create = st.form_submit_button("Upload project")
-    if create:
-        for i in range(len(st.session_state.pr_df)):
-            upload_query = f"INSERT INTO pr_main (com_id, l1_id, l2_id, country1, country2, proj_type, phase, proj_size, contr_type, greenfield, prefab, climate, elevation, city_size, city_dist, term_dist, client_size, contr_size, bl_start, bl_finish, ac_start, ac_finish) VALUES('{st.session_state.pr_df['COM_ID'][i]}','{st.session_state.pr_df['L1_ID'][i]}','{st.session_state.pr_df['L2_ID'][i]}','{st.session_state.pr_df['COUNTRY1'][i]}','{st.session_state.pr_df['COUNTRY2'][i]}','{st.session_state.pr_df['PROJ_TYPE'][i]}','{st.session_state.pr_df['PHASE'][i]}','{st.session_state.pr_df['PROJ_SIZE'][i]}','{st.session_state.pr_df['CONTR_TYPE'][i]}','{st.session_state.pr_df['GREENFIELD'][i]}','{st.session_state.pr_df['PREFAB'][i]}','{st.session_state.pr_df['CLIMATE'][i]}','{st.session_state.pr_df['ELEVATION'][i]}','{st.session_state.pr_df['CITY_SIZE'][i]}','{st.session_state.pr_df['CITY_DIST'][i]}','{st.session_state.pr_df['TERM_DIST'][i]}','{st.session_state.pr_df['CLIENT_SIZE'][i]}','{st.session_state.pr_df['CONTR_SIZE'][i]}','{st.session_state.pr_df['BL_START'][i]}','{st.session_state.pr_df['BL_FINISH'][i]}','{st.session_state.pr_df['AC_START'][i]}','{st.session_state.pr_df['AC_FINISH'][i]}');"
-            st.caption(f'uploading (running query): {upload_query}')
-
-            run_query(upload_query)
-        st.success("Project uploaded (waiting for review)")
 st.markdown('***')
