@@ -145,7 +145,10 @@ with st.form('reg_upload'):
 add_reg = st.button('ADD REGISTER')
 #st.write(st.session_state.rg_df1)
 if add_reg:
-    if len(st.session_state.pr_df['COM_ID']) == 0:
+    if st.session_state.rg_df1['L2_ID'][0] in st.session_state.pr_df.L2_ID.tolist():
+        st.warning(f'Register already pre-loaded. CHECK REGISTER. The value "L2_ID" must be unique (L2_ID number {st.session_state.rg_df1["L2_ID"][0]} already exists. )')
+
+    elif len(st.session_state.pr_df['COM_ID']) == 0:
         st.session_state.pr_df = st.session_state.rg_df1.copy()
     elif st.session_state.pr_df['COM_ID'][0] == '-':
         st.session_state.pr_df = st.session_state.rg_df1.copy()
