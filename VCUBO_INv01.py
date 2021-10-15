@@ -179,7 +179,7 @@ with del01:
     with st.form('upload_project'):
         #if show_table: st.table(st.session_state.pr_df)
         st.write(st.session_state.pr_df)
-        upload_pr = st.form_submit_button("Upload project")
+        upload_pr = st.form_submit_button("UPLOAD PROJECT")
         if upload_pr:
             for i in range(len(st.session_state.pr_df)):
                 upload_query = f"INSERT INTO pr_main (com_id, l1_id, l2_id, country1, country2, proj_type, phase, proj_size, contr_type, greenfield, prefab, climate, elevation, city_size, city_dist, term_dist, client_size, contr_size, bl_start, bl_finish, ac_start, ac_finish) VALUES('{st.session_state.pr_df['COM_ID'][i]}','{st.session_state.pr_df['L1_ID'][i]}','{st.session_state.pr_df['L2_ID'][i]}','{st.session_state.pr_df['COUNTRY1'][i]}','{st.session_state.pr_df['COUNTRY2'][i]}','{st.session_state.pr_df['PROJ_TYPE'][i]}','{st.session_state.pr_df['PHASE'][i]}','{st.session_state.pr_df['PROJ_SIZE'][i]}','{st.session_state.pr_df['CONTR_TYPE'][i]}','{st.session_state.pr_df['GREENFIELD'][i]}','{st.session_state.pr_df['PREFAB'][i]}','{st.session_state.pr_df['CLIMATE'][i]}','{st.session_state.pr_df['ELEVATION'][i]}','{st.session_state.pr_df['CITY_SIZE'][i]}','{st.session_state.pr_df['CITY_DIST'][i]}','{st.session_state.pr_df['TERM_DIST'][i]}','{st.session_state.pr_df['CLIENT_SIZE'][i]}','{st.session_state.pr_df['CONTR_SIZE'][i]}','{st.session_state.pr_df['BL_START'][i]}','{st.session_state.pr_df['BL_FINISH'][i]}','{st.session_state.pr_df['AC_START'][i]}','{st.session_state.pr_df['AC_FINISH'][i]}');"
