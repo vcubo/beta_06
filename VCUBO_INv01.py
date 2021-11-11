@@ -77,6 +77,7 @@ with st.form('reg_upload'):
     with a02: sel_protype = st.selectbox('PROJECT TYPE', st.session_state.protype_list)
     with a03: sel_prosize = st.selectbox('PROJECT SIZE', st.session_state.prosize_list)
     #create_pr = st.button('CREATE PROJECT')
+    st.session_state.pro_descript = st.text_area('PROJECT BRIEF DESCRIPTION', max_chars=200)
     st.markdown('***')
 #L2 FACTORS
     #st.markdown('LEVEL 2')
@@ -107,8 +108,8 @@ with st.form('reg_upload'):
     d01, d02, d03, d04 = st.columns(4)
     with d01: sel_bl_start = st.date_input('BL START')
     with d02: sel_bl_finis = st.date_input('BL FINISH')
-    with d03: sel_ac_start = st.date_input('ACTUAL START')
-    with d04: sel_ac_finis = st.date_input('ACTUAL FINISH')
+    with d03: sel_ac_start = st.date_input('ACTUAL/FORECAST START')
+    with d04: sel_ac_finis = st.date_input('ACTUAL/FORECAST FINISH')
     check_reg = st.form_submit_button('CHECK REGISTER')
     if check_reg:
         st.session_state.rg_df1['COM_ID'][0] = st.session_state.COM_ID
@@ -185,8 +186,8 @@ with del01:
                 upload_query = f"INSERT INTO pr_main (com_id, l1_id, l2_id, country1, country2, proj_type, phase, proj_size, contr_type, greenfield, prefab, climate, elevation, city_size, city_dist, term_dist, client_size, contr_size, bl_start, bl_finish, ac_start, ac_finish) VALUES('{st.session_state.pr_df['COM_ID'][i]}','{st.session_state.pr_df['L1_ID'][i]}','{st.session_state.pr_df['L2_ID'][i]}','{st.session_state.pr_df['COUNTRY1'][i]}','{st.session_state.pr_df['COUNTRY2'][i]}','{st.session_state.pr_df['PROJ_TYPE'][i]}','{st.session_state.pr_df['PHASE'][i]}','{st.session_state.pr_df['PROJ_SIZE'][i]}','{st.session_state.pr_df['CONTR_TYPE'][i]}','{st.session_state.pr_df['GREENFIELD'][i]}','{st.session_state.pr_df['PREFAB'][i]}','{st.session_state.pr_df['CLIMATE'][i]}','{st.session_state.pr_df['ELEVATION'][i]}','{st.session_state.pr_df['CITY_SIZE'][i]}','{st.session_state.pr_df['CITY_DIST'][i]}','{st.session_state.pr_df['TERM_DIST'][i]}','{st.session_state.pr_df['CLIENT_SIZE'][i]}','{st.session_state.pr_df['CONTR_SIZE'][i]}','{st.session_state.pr_df['BL_START'][i]}','{st.session_state.pr_df['BL_FINISH'][i]}','{st.session_state.pr_df['AC_START'][i]}','{st.session_state.pr_df['AC_FINISH'][i]}');"
                 st.success(f'Uploaded {st.session_state.pr_df["L2_ID"][i]} (waiting for review)')
                 run_query(upload_query)
-
-
-
+            pr_desc_query = f"INSERT INTO pr_desc (l1_id, pr_desc, pr_size) VALUES ('{st.session_state.pr_df['L1_ID'][0]}', '{st.session_state.pro_descript}', '{st.session_state.pr_df['PROJ_SIZE'][0]}');"
+            #run_query(pr_desc_query)
+            st.success(f'Uploaded general data for project {st.session_state.pr_df["L1_ID"][0]}.')
 
 st.markdown('***')
