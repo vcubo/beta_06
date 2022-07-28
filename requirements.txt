@@ -5,4 +5,4 @@ plotly
 scipy
 hydralit_components
 streamlit_analytics
-psycopg2
+psycopg2-binary
